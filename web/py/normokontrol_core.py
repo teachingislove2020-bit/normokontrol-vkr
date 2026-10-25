@@ -5,13 +5,13 @@ from lxml import etree
 
 import os
 TXS = 0.03   # доля абзацев основного текста с отклонением, при которой срабатывает TX1
-PROFILE = 'metod'      # metod: правое поле 10 мм, номер справа (решение 5); gost: 15 мм, по центру
+PROFILE = 'gost'      # gost (по умолчанию): правое поле 15 мм, номер по центру; metod: 10 мм, справа (старая методичка)
 PROFILE_T = 'gost'     # gost | practice: содержание
 PROFILE_H = 'gost'     # gost | practice: заголовки
 NO_TITLE = False       # True: файл без титульного листа (сервис самопроверки)
 LS_TOL_CFG = 60
 
-def configure(profile='metod', toc='gost', headings='gost', no_title=False, ls_tol=60):
+def configure(profile='gost', toc='gost', headings='gost', no_title=False, ls_tol=60):
     global PROFILE, PROFILE_T, PROFILE_H, NO_TITLE, LS_TOL, LS_TOL_CFG
     PROFILE, PROFILE_T, PROFILE_H, NO_TITLE, LS_TOL = profile, toc, headings, no_title, ls_tol
 NS = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main',
@@ -708,7 +708,7 @@ def check(path):
 
 if __name__ == '__main__':
     folder = sys.argv[1]; out = sys.argv[2]
-    configure(profile=os.environ.get('NK_PROFILE', 'metod'), toc=os.environ.get('NK_TOC', 'gost'), headings=os.environ.get('NK_HEADINGS', 'gost'), ls_tol=int(os.environ.get('NK_LS_TOL', 60)))
+    configure(profile=os.environ.get('NK_PROFILE', 'gost'), toc=os.environ.get('NK_TOC', 'gost'), headings=os.environ.get('NK_HEADINGS', 'gost'), ls_tol=int(os.environ.get('NK_LS_TOL', 60)))
     res = {}
     for f in sorted(glob.glob(os.path.join(folder, '*.docx'))):
         name = re.sub(r'^1_|\.docx$', '', os.path.basename(f))

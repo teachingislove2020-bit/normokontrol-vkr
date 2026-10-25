@@ -1,5 +1,5 @@
 """Проверка списка использованных источников и ссылок на него.
-Правила: L0, L1, REF0, REF1, REF2, LS2n, ORD1, ORD2, DUP, BIB1–BIB6 (см. rules.json).
+Правила: L0, L1, REF0, REF1, REF2, LS2n, ORD1, DUP, BIB1–BIB6 (см. rules.json).
 Порядок записей — алфавитный (решение 10), нумерация — по ГОСТ 7.32-2017, п. 6.16 (решение 11),
 описание — по ГОСТ Р 7.0.100-2018 (решение 12)."""
 import re
@@ -316,42 +316,6 @@ def check_biblio(src):
     for r, m in msgs[:5]:
         add('LS2n', m + ' (ГОСТ 7.32-2017, п. 6.16)', quote=r['text'][:70], head=HEAD, par=r['par'], page=pg(r['par']))
 
-    # порядок (внутри подгрупп)
-    groups = {}
-    for r in recs:
-        groups.setdefault(r['group'], []).append(r)
-    for g, rs in groups.items():
-        if len(rs) < 3:
-            continue
-        # ORD2: русские после иностранных
-        first_lat = next((k for k, r in enumerate(rs) if not is_cyr(r['text'])), None)
-        if first_lat is not None:
-            late = [r for r in rs[first_lat:] if is_cyr(r['text'])]
-            if late:
-                add('ORD2', 'русскоязычных источников после иностранных: %d (иностранные ставят после русских)' % len(late),
-                    quote=late[0]['text'][:70], head=HEAD, par=late[0]['par'], page=pg(late[0]['par']),
-                    examples=[dict(quote='%d. %s' % (r['num'], r['text'][:60]), head=HEAD, page=pg(r['par'])) for r in late[:5]])
-        # ORD1: алфавит отдельно в русской и иностранной частях
-        for cyr in (True, False):
-            part = [r for r in rs if is_cyr(r['text']) == cyr]
-            if len(part) < 3:
-                continue
-            keys = [sort_key(r['text']) for r in part]
-            keep = lis_keep(keys)
-            bad = [part[i] for i in range(len(part)) if i not in keep]
-            if not bad:
-                continue
-            if len(bad) / len(part) > 0.4:
-                add('ORD1', 'записи не в алфавитном порядке: вне порядка %d из %d (вероятно, список составлен по порядку ссылок)' % (len(bad), len(part)),
-                    quote=bad[0]['text'][:70], head=HEAD, par=bad[0]['par'], page=pg(bad[0]['par']),
-                    examples=[dict(quote='%d. %s' % (r['num'], r['text'][:60]), head=HEAD, page=pg(r['par'])) for r in bad[:5]])
-            else:
-                for r in bad[:6]:
-                    add('ORD1', 'запись %d стоит не по алфавиту' % r['num'], quote=r['text'][:70], head=HEAD, par=r['par'], page=pg(r['par']))
-                if len(bad) > 6:
-                    add('ORD1', 'ещё записей вне алфавитного порядка: %d' % (len(bad) - 6), quote='', head=HEAD,
-                        examples=[dict(quote='%d. %s' % (r['num'], r['text'][:60]), head=HEAD, page=pg(r['par'])) for r in bad[6:11]])
-
     # дубли
     norm = {}
     for r in recs:
@@ -421,6 +385,30 @@ def check_biblio(src):
             add('REF1', 'ссылка %s: в списке нет источника с номером %d (всего %d)' % (frag, x, maxn), quote=ctx, head=hd, par=i, page=pg(i))
         if len(bad) > 10:
             add('REF1', 'ещё ссылок на несуществующие номера: %d' % (len(bad) - 10))
+        # ORD1: порядок по первым ссылкам (ГОСТ 7.32-2017, п. 6.9.1: номер = порядок первого упоминания)
+        first_seen = []
+        seen_o = set()
+        for nums_, frag, i, hd, t, mp in cite_list:
+            for k_, x in enumerate(nums_):
+                if mp and k_ == 1:
+                    continue
+                if 1 <= x <= maxn and x not in seen_o:
+                    seen_o.add(x)
+                    first_seen.append((x, frag, i, hd))
+        out = []
+        top = 0
+        for x, frag, i, hd in first_seen:
+            if x != top + 1:
+                out.append((x, frag, i, hd, top + 1))
+            top = max(top, x)
+        if out:
+            if len(out) > 4:
+                add('ORD1', 'источники пронумерованы не по порядку первых ссылок: вне порядка %d из %d (вероятно, список составлен по алфавиту)' % (len(out), len(first_seen)),
+                    quote=out[0][1], head=out[0][3], par=out[0][2], page=pg(out[0][2]),
+                    examples=[dict(quote='ссылка %s, ожидался №%d' % (f, e), head=hd, page=pg(i)) for x, f, i, hd, e in out[:5]])
+            else:
+                for x, f, i, hd, e in out:
+                    add('ORD1', 'первая ссылка на источник %d стоит там, где ожидался №%d' % (x, e), quote=f, head=hd, par=i, page=pg(i))
         if len(cite_list) >= 3:
             unc = [r for r in recs if r['num'] not in cited]
             if unc:

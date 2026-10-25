@@ -85,21 +85,21 @@ ok(not has(rs, 'REF2') and not has(rs, 'REF1'), 'диапазон [1–18] по�
 # 8. нет ссылок вообще
 rs = rules(doc(GOLD, cites='Текст без ссылок.'))
 ok(has(rs, 'REF0'), 'REF0: нет ссылок')
-# 9. порядок: перестановка одной записи
-bad = GOLD[:]; bad[2], bad[7] = bad[7], bad[2]
-rs = rules(doc(bad))
-ok(has(rs, 'ORD1'), 'ORD1: перестановка')
-# 10. по порядку ссылок (случайный)
-random.seed(1); sh = GOLD[:]; random.shuffle(sh)
-rs = rules(doc(sh))
-ok(any(r == 'ORD1' and 'вероятно' in m for r, m in rs) or sum(r == 'ORD1' for r, m in rs) >= 3, 'ORD1: перемешанный список')
-# 11. иностранные перед русскими
+# 9. порядок по первым ссылкам: одна ссылка не на своём месте
+cs = ' '.join('[%d]' % i for i in range(1, 19)).replace('[3] [4]', '[4] [3]')
+rs = rules(doc(GOLD, cites=cs))
+ok(has(rs, 'ORD1'), 'ORD1: ссылка [4] раньше [3]')
+# 10. список по алфавиту, ссылки в другом порядке
+random.seed(1); order = list(range(1, 19)); random.shuffle(order)
+rs = rules(doc(GOLD, cites=' '.join('[%d]' % i for i in order)))
+ok(any(r == 'ORD1' and 'вероятно' in m for r, m in rs), 'ORD1: список составлен не по порядку ссылок')
+# 11. иностранные перед русскими больше не ошибка (ORD2 снято)
 mix = EN[:2] + RU + EN[2:]
 rs = rules(doc(mix))
-ok(has(rs, 'ORD2'), 'ORD2: иностранные раньше русских')
+ok(not has(rs, 'ORD1') and not has(rs, 'ORD2'), 'иностранные раньше русских: не ошибка, если порядок по ссылкам')
 # 12. дубль
 dup = GOLD[:]; dup.insert(1, GOLD[0])
-rs = rules(doc(sorted(dup, key=lambda s: B.sort_key(s) if B.is_cyr(s) else [(2, s)])))
+rs = rules(doc(dup))
 ok(has(rs, 'DUP'), 'DUP: повтор записи')
 # 13. пропуск номера (ручная нумерация)
 ps = [para('ВВЕДЕНИЕ', center=True), para('Текст [1].'), para('СПИСОК ЛИТЕРАТУРЫ', center=True)]

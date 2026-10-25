@@ -24,7 +24,7 @@ def run(data, cfg_json='{}'):
     """data — bytes .docx. Возвращает JSON-строку с отчётом."""
     cfg = json.loads(cfg_json or '{}')
     try:
-        C.configure(profile='metod', toc='gost', headings='gost', no_title=True)
+        C.configure(profile='gost', toc='gost', headings='gost', no_title=True)
         F, meta = C.check(io.BytesIO(bytes(data)))
         findings = list(meta['findings'])
         pages_known = meta['pages_known']

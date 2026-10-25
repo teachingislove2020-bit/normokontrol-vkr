@@ -5,7 +5,7 @@ from lxml import etree
 
 import os
 TXS = 0.03   # доля абзацев основного текста с отклонением, при которой правило TX1 срабатывает
-PROFILE = os.environ.get('NK_PROFILE', 'metod')   # metod: правое поле 10 мм и номер справа (до нового ГОСТ); gost: 15 мм и по центру
+PROFILE = os.environ.get('NK_PROFILE', 'gost')   # gost (по умолчанию): 15 мм, номер по центру; metod: 10 мм, справа и по центру
 PROFILE_T = os.environ.get('NK_TOC', 'gost')   # gost: содержание по 5.4.1 и 6.13 (влево, сдвиг подразделов); practice: по ширине, без отступов, как требовал нормоконтролёр
 PROFILE_H = os.environ.get('NK_HEADINGS', 'gost')   # gost: заголовки разделов по ГОСТ 6.2.3; practice: по центру, как требовал нормоконтролёр
 NS = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main',
