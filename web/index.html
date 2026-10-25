@@ -12,8 +12,8 @@
 <main>
   <header>
     <h1>Самопроверка оформления ВКР</h1>
-    <p class="lead">Загрузите файл .docx <strong>без титульного листа</strong> и получите список замечаний по ГОСТ 7.32-2017 и методичке: что исправить, где и по какому пункту.</p>
-    <p class="privacy">🔒 Файл не отправляется на сервер: проверка выполняется в вашем браузере и после закрытия страницы ничего не сохраняется.</p>
+    <p class="lead">Загрузите файл .docx <strong>без титульного листа</strong> и получите список замечаний по ГОСТ 7.32-2017 и методичке: что исправить, где и по какому пункту. По каждому замечанию отметьте, что вы исправили, а что оставили и почему, и скачайте лист самопроверки для нормоконтролёра.</p>
+    <p class="privacy">🔒 Файл не отправляется на сервер: проверка и сборка листа выполняются в вашем браузере, а после закрытия страницы ничего не сохраняется.</p>
   </header>
 
   <section class="card" id="upload">
@@ -39,9 +39,10 @@
         <button type="button" class="tab active" data-f="all">Все</button>
         <button type="button" class="tab" data-f="fix">Исправьте</button>
         <button type="button" class="tab" data-f="check">Проверьте</button>
+        <button type="button" class="tab" data-f="todo">Без решения</button>
       </div>
       <div class="actions">
-        <button type="button" id="save" class="ghost">Скачать отчёт (HTML)</button>
+        <button type="button" id="save" class="ghost">Сохранить отчёт (HTML)</button>
         <button type="button" id="print" class="ghost">Печать / PDF</button>
       </div>
     </div>
@@ -51,6 +52,20 @@
       <p class="hint">Эти пункты сервис не проверяет.</p>
       <ul id="self-list"></ul>
     </section>
+    <section class="card sheetbar" id="sheetbar" aria-label="Лист самопроверки">
+      <div class="sb-main">
+        <div class="sb-text"><strong id="sb-count"></strong><span id="sb-hint" class="hint"></span></div>
+        <button type="button" id="sheet-dl" disabled>Скачать лист</button>
+      </div>
+      <div class="sb-extra">
+        <label class="chk"><input type="checkbox" id="noquotes"> Не включать в лист фрагменты текста (названия разделов останутся)</label>
+        <button type="button" id="goto" class="ghost">Показать первое нерешённое</button>
+      </div>
+      <details class="sb-note"><summary>Что попадёт в лист</summary>
+        <p class="hint">В лист не попадают имя файла, титульный лист и ФИО, в самом файле нет сведений об авторе. Во фрагментах скрываются адреса почты и номера телефонов. Если во фрагментах встретились ваши фамилия или контакты, включите отметку выше. Не указывайте их и в пояснениях. Решения не сохраняются: скачайте лист до закрытия страницы.</p>
+      </details>
+      <p class="status" id="sheet-status" role="status" aria-live="polite"></p>
+    </section>
   </section>
 
   <footer>
@@ -58,9 +73,10 @@
       <summary>Как читать отчёт</summary>
       <p><strong>Исправьте</strong> — нарушения, которые сервис находит надёжно: на размеченных работах эти правила срабатывали верно в большинстве случаев. <strong>Проверьте</strong> — вероятное нарушение: правило даёт больше ложных срабатываний или зависит от того, как документ устроен внутри; решите по тексту и по требованию. Если замечание кажется неверным, ориентируйтесь на ГОСТ и методичку.</p>
       <p>Номера страниц берутся из меток, которые Word записывает при сохранении. Если файл сохранён не в Word (например, в Google Документах или LibreOffice), страницы не определяются, и вместо них показывается раздел и фрагмент текста.</p>
+      <p><strong>Лист самопроверки.</strong> По замечанию «Проверьте» выберите «Исправил(а)» или «Оставляю»; для «Оставляю» укажите пункт ГОСТ или методички и причину. Если замечание уровня «Исправьте» кажется ошибочным, выберите «Не согласен(на), оставляю» и объясните почему. Лист скачивается, когда решение принято по каждому замечанию.</p>
       <p>Сервис не заменяет нормоконтроль: он не проверяет титульный лист, задание, содержание рисунков и таблиц, формулы и качество текста.</p>
     </details>
-    <p class="ver">Версия <span id="ver">0.9</span> · код и правила открыты: <a href="https://github.com/teachingislove2020-bit/normokontrol-vkr" rel="noopener">GitHub</a></p>
+    <p class="ver">Версия <span id="ver">0.10</span> · код и правила открыты: <a href="https://github.com/teachingislove2020-bit/normokontrol-vkr" rel="noopener">GitHub</a></p>
   </footer>
 </main>
 <script src="app.js"></script>

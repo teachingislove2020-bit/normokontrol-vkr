@@ -24,6 +24,7 @@ jobs:
           python-version: '3.12'
       - run: pip install lxml
       - run: python tests/test_biblio.py
+      - run: python tests/test_sheet.py
 
   deploy:
     needs: test
