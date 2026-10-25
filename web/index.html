@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self'; worker-src 'self' blob:; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Самопроверка ВКР</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header>
+    <h1>Самопроверка оформления ВКР</h1>
+    <p class="lead">Загрузите файл .docx <strong>без титульного листа</strong> и получите список замечаний по ГОСТ 7.32-2017 и методичке: что исправить, где и по какому пункту.</p>
+    <p class="privacy">🔒 Файл не отправляется на сервер: проверка выполняется в вашем браузере и после закрытия страницы ничего не сохраняется.</p>
+  </header>
+
+  <section class="card" id="upload">
+    <label class="drop" id="drop" for="file">
+      <input type="file" id="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+      <span class="drop-title" id="drop-title">Выберите файл .docx или перетащите его сюда</span>
+      <span class="drop-sub" id="drop-sub">Только .docx (формат .doc сначала сохраните как .docx)</span>
+    </label>
+    <div class="row">
+      <label class="field">Сколько страниц занимают титульный лист и задание, которых нет в файле
+        <input type="number" id="offset" min="0" max="20" value="0" inputmode="numeric">
+      </label>
+      <button id="run" type="button" disabled>Проверить</button>
+    </div>
+    <p class="hint">Номера страниц в отчёте будут сдвинуты на это число, чтобы совпадать с нумерацией готовой работы.</p>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section id="report" hidden>
+    <div class="summary card" id="summary"></div>
+    <div class="toolbar" id="toolbar">
+      <div class="tabs" role="tablist" aria-label="Фильтр">
+        <button type="button" class="tab active" data-f="all">Все</button>
+        <button type="button" class="tab" data-f="fix">Исправьте</button>
+        <button type="button" class="tab" data-f="check">Проверьте</button>
+      </div>
+      <div class="actions">
+        <button type="button" id="save" class="ghost">Скачать отчёт (HTML)</button>
+        <button type="button" id="print" class="ghost">Печать / PDF</button>
+      </div>
+    </div>
+    <div id="groups"></div>
+    <section class="card" id="self">
+      <h2>Проверьте сами</h2>
+      <p class="hint">Эти пункты сервис не проверяет.</p>
+      <ul id="self-list"></ul>
+    </section>
+  </section>
+
+  <footer>
+    <details>
+      <summary>Как читать отчёт</summary>
+      <p><strong>Исправьте</strong> — нарушения, которые сервис находит надёжно: на размеченных работах эти правила срабатывали верно в большинстве случаев. <strong>Проверьте</strong> — вероятное нарушение: правило даёт больше ложных срабатываний или зависит от того, как документ устроен внутри; решите по тексту и по требованию. Если замечание кажется неверным, ориентируйтесь на ГОСТ и методичку.</p>
+      <p>Номера страниц берутся из меток, которые Word записывает при сохранении. Если файл сохранён не в Word (например, в Google Документах или LibreOffice), страницы не определяются, и вместо них показывается раздел и фрагмент текста.</p>
+      <p>Сервис не заменяет нормоконтроль: он не проверяет титульный лист, задание, содержание рисунков и таблиц, формулы и качество текста.</p>
+    </details>
+    <p class="ver">Версия <span id="ver">0.9</span> · код и правила открыты: <a href="https://github.com/teachingislove2020-bit/normokontrol-vkr" rel="noopener">GitHub</a></p>
+  </footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
