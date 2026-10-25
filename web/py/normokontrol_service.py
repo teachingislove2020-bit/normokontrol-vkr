@@ -2,8 +2,9 @@
 import io, json, re, traceback
 import normokontrol_core as C
 import normokontrol_biblio as B
+import normokontrol_sheet as H
 
-VERSION = '0.9'
+VERSION = '0.10'
 _RULES = None
 
 
@@ -67,10 +68,16 @@ def run(data, cfg_json='{}'):
     # агрегатные замечания учитывают число нарушений в самом тексте сообщения; для сортировки используем число находок
     rank = {'fix': 0, 'check': 1}
     out.sort(key=lambda g: (rank.get(g['level'], 2), g['rule'], g['sub'] or ''))
-    for g in out:
-        g['more'] = max(0, len(g['items']) - 8)
-        g['items'] = g['items'][:8]
+    for gi, g in enumerate(out):          # все замечания отдаются целиком: по каждому студент принимает решение
+        g['gid'] = gi
+        for ii, it in enumerate(g['items']):
+            it['id'] = '%d-%d' % (gi, ii)
     stats = dict(fix_groups=sum(1 for g in out if g['level'] == 'fix'), check_groups=sum(1 for g in out if g['level'] == 'check'),
                  fix_items=sum(g['count'] for g in out if g['level'] == 'fix'), check_items=sum(g['count'] for g in out if g['level'] == 'check'))
     return json.dumps(dict(version=VERSION, pages_known=pages_known, stats=stats, groups=out,
                            self_checks=_RULES.get('self_checks', []), body_paragraphs=meta.get('n_body')), ensure_ascii=False)
+
+
+def make_sheet(payload_json):
+    """Проверка решений студента и сборка листа самопроверки (.docx). Возвращает JSON: ok + b64 либо problems."""
+    return H.make(payload_json)

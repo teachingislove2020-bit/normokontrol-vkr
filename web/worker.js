@@ -2,7 +2,7 @@
 import { loadPyodide } from './pyodide/pyodide.mjs';
 
 const BASE = new URL('./', self.location.href).href;
-const V = '0.9';
+const V = '0.10';
 let py = null;
 const ready = (async () => {
   post('status', 'Загружаю движок проверки (около 16 МБ, один раз)…');
@@ -10,7 +10,7 @@ const ready = (async () => {
   post('status', 'Подключаю разбор документов…');
   await py.loadPackage('lxml');
   py.FS.mkdirTree('/app');
-  for (const f of ['normokontrol_core.py', 'normokontrol_biblio.py', 'normokontrol_service.py']) {
+  for (const f of ['normokontrol_core.py', 'normokontrol_biblio.py', 'normokontrol_sheet.py', 'normokontrol_service.py']) {
     const r = await fetch(BASE + 'py/' + f + '?v=' + V);
     if (!r.ok) throw new Error('Не загрузился ' + f);
     py.FS.writeFile('/app/' + f, await r.text());
@@ -26,6 +26,16 @@ function post(type, payload) { self.postMessage({ type, payload }); }
 
 self.onmessage = async (ev) => {
   const m = ev.data;
+  if (m.type === 'sheet') {
+    try {
+      await ready;
+      py.globals.set('_sheet_in', m.payload);
+      post('sheet', py.runPython('S.make_sheet(_sheet_in)'));
+    } catch (e) {
+      post('sheet', JSON.stringify({ ok: false, error: String(e && e.message || e) }));
+    }
+    return;
+  }
   if (m.type !== 'check') return;
   try {
     await ready;
